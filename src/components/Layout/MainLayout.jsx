@@ -10,9 +10,20 @@ import {
 } from '@ant-design/icons'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import './MainLayout.css'
 
 const { Header, Content, Footer } = Layout
 const { Text } = Typography
+
+const BRAND_TEXT = 'Пульс Арктики'
+
+const COLORS = {
+  textDarkBlue: '#0A2B4E',
+  pillBg: 'rgba(247, 247, 247, 0.9)',
+  pillBorder: 'rgba(200, 204, 209, 0.65)',
+  pillShadow: '0 8px 24px rgba(0, 144, 255, 0.08)',
+  hoverBg: 'rgba(160, 200, 255, 0.55)',
+}
 
 const MainLayout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -115,10 +126,10 @@ const MainLayout = ({ children }) => {
               width: '100%',
               textAlign: 'left',
               padding: '12px 16px',
-              background: location.pathname === item.key ? '#E6F4FF' : 'transparent',
+              background: location.pathname === item.key ? COLORS.hoverBg : 'transparent',
               border: 'none',
               borderRadius: 8,
-              color: location.pathname === item.key ? '#00A8A8' : '#333',
+              color: COLORS.textDarkBlue,
               fontWeight: location.pathname === item.key ? 'bold' : 'normal',
               cursor: 'pointer',
               marginBottom: 4,
@@ -154,7 +165,10 @@ const MainLayout = ({ children }) => {
   )
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(180deg, var(--ruwiki-blue) 0, rgba(160, 200, 255, -1) 270px, var(--ruwiki-gray-light) 100px)',
+    }}>
       {/* Шапка — полупрозрачная, овальная */}
       <Header style={{
         background: 'transparent',
@@ -166,21 +180,22 @@ const MainLayout = ({ children }) => {
         lineHeight: 'normal',
       }}>
         <div style={{
-          maxWidth: 'calc(100% - 40px)',
+          width: 'calc(100% - 40px)',
+          maxWidth: 1120,
           margin: '0 auto',
-          background: 'rgba(10, 43, 78, 0.75)',
-          backdropFilter: 'blur(10px)',
+          background: COLORS.pillBg,
+          backdropFilter: 'blur(12px)',
           borderRadius: 50,
           padding: isMobile ? '8px 16px' : '10px 28px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-          border: '1px solid rgba(255,255,255,0.15)'
+          boxShadow: COLORS.pillShadow,
+          border: `1px solid ${COLORS.pillBorder}`,
         }}>
           {/* Логотип */}
-          <Link to="/" style={{ color: 'white', fontSize: isMobile ? '18px' : '22px', fontWeight: 'bold' }}>
-            {isMobile ? '🗺️' : '🗺️ Арктический портал'}
+          <Link to="/" style={{ color: COLORS.textDarkBlue, fontSize: isMobile ? '18px' : '22px', fontWeight: 'bold', textDecoration: 'none' }}>
+            {BRAND_TEXT}
           </Link>
 
           {/* Десктопное меню */}
@@ -193,16 +208,16 @@ const MainLayout = ({ children }) => {
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: location.pathname === item.key ? '#00A8A8' : 'white',
+                    color: location.pathname === item.key ? COLORS.textDarkBlue : COLORS.textDarkBlue,
                     fontSize: 14,
                     fontWeight: location.pathname === item.key ? 'bold' : 'normal',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                     padding: '8px 0',
-                    borderBottom: location.pathname === item.key ? '2px solid #00A8A8' : '2px solid transparent'
+                    borderBottom: location.pathname === item.key ? `2px solid ${COLORS.textDarkBlue}` : '2px solid transparent',
                   }}
-                  onMouseEnter={(e) => e.target.style.color = '#00A8A8'}
-                  onMouseLeave={(e) => e.target.style.color = location.pathname === item.key ? '#00A8A8' : 'white'}
+                  onMouseEnter={(e) => { e.target.style.background = COLORS.hoverBg }}
+                  onMouseLeave={(e) => { e.target.style.background = 'transparent' }}
                 >
                   {item.label}
                 </button>
@@ -215,14 +230,14 @@ const MainLayout = ({ children }) => {
             {/* Поиск */}
             {!isMobile ? (
               <Input.Search
+                className="main-layout-search"
                 placeholder="Поиск..."
-                style={{ width: 180, background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: 30 }}
-                suffix={<SearchOutlined style={{ color: 'rgba(255,255,255,0.7)' }} />}
+                style={{ width: 180 }}
                 onSearch={(value) => console.log('search:', value)}
               />
             ) : (
               <SearchOutlined 
-                style={{ fontSize: 18, color: 'white', cursor: 'pointer' }} 
+                style={{ fontSize: 18, color: COLORS.textDarkBlue, cursor: 'pointer' }} 
                 onClick={() => setSearchModalOpen(true)}
               />
             )}
@@ -231,19 +246,19 @@ const MainLayout = ({ children }) => {
             <button
               onClick={toggleLanguage}
               style={{
-                background: 'rgba(255,255,255,0.15)',
-                border: 'none',
+                background: 'white',
+                border: `1px solid ${COLORS.pillBorder}`,
                 borderRadius: 30,
                 padding: isMobile ? '5px 14px' : '6px 18px',
-                color: 'white',
+                color: COLORS.textDarkBlue,
                 fontSize: isMobile ? 13 : 14,
                 fontWeight: '500',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 letterSpacing: '0.5px'
               }}
-              onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.25)'}
-              onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.15)'}
+              onMouseEnter={(e) => { e.target.style.background = COLORS.hoverBg }}
+              onMouseLeave={(e) => { e.target.style.background = 'white' }}
             >
               {currentLang}
             </button>
@@ -259,7 +274,7 @@ const MainLayout = ({ children }) => {
                   <Avatar 
                     icon={<UserOutlined />} 
                     style={{ 
-                      background: '#00A8A8', 
+                      background: COLORS.textDarkBlue,
                       cursor: 'pointer',
                       width: isMobile ? 28 : 32,
                       height: isMobile ? 28 : 32
@@ -272,7 +287,7 @@ const MainLayout = ({ children }) => {
             {/* Бургер для мобильных */}
             {isMobile && (
               <MenuOutlined 
-                style={{ fontSize: 18, color: 'white', cursor: 'pointer' }}
+                style={{ fontSize: 18, color: COLORS.textDarkBlue, cursor: 'pointer' }}
                 onClick={() => setMobileMenuOpen(true)}
               />
             )}
@@ -280,12 +295,7 @@ const MainLayout = ({ children }) => {
         </div>
       </Header>
 
-      <Content style={{ 
-        padding: isMobile ? '16px' : '32px', 
-        background: '#f5f7fa', 
-        minHeight: 'calc(100vh - 60px)',
-        marginTop: isMobile ? 16 : 32
-      }}>
+      <Content className={`main-layout-content${isMobile ? ' is-mobile' : ''}`}>
         {children}
       </Content>
 
