@@ -203,49 +203,44 @@ const HomePage = () => {
         <Col xs={24} lg={8}>
           {/* Дайджест дня */}
           <Card 
-            title={<span style={{ fontSize: isMobile ? 14 : 16 }}>📋 Дайджест дня</span>}
+            title={<span style={{ fontSize: isMobile ? 14 : 20, color: 'rgb(10, 43, 78)' }}>Дайджест дня</span>}
             style={{ 
-              background: 'linear-gradient(135deg, #E6F4FF 0%, #D4F0F0 100%)',
+              background: 'linear-gradient(rgb(105 175 250) 0%, rgb(30 215 215) 100%)',
               borderRadius: 16,
               marginBottom: 24
             }}
             bodyStyle={{ padding: isMobile ? 12 : 20 }}
+            headStyle={{ background: 'transparent', border: 'none' }}
           >
-            {digestItems.slice(0, isMobile ? 3 : 4).map((item, idx) => (
+            {digestItems.slice(0, 3).map((item, idx) => (
               <div 
                 key={idx} 
-                style={{ marginBottom: isMobile ? 16 : 20, cursor: 'pointer' }}
+                style={{ 
+                  marginBottom: idx < 2 ? 16 : 0, 
+                  cursor: 'pointer',
+                  background: '#fafafa',
+                  padding: 12,
+                  borderRadius: 8
+                }}
                 onClick={() => goToDigest()}
               >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                  <div style={{ 
-                    width: isMobile ? 24 : 28, 
-                    height: isMobile ? 24 : 28, 
-                    background: '#4A90E2', 
-                    borderRadius: '50%', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: isMobile ? 12 : 14,
-                    fontWeight: 'bold',
-                    flexShrink: 0
-                  }}>
-                    {idx + 1}
-                  </div>
-                  <div>
-                    <Text strong style={{ fontSize: isMobile ? 13 : 14 }}>{item.title}</Text>
-                    <Paragraph type="secondary" style={{ marginTop: 4, fontSize: isMobile ? 11 : 12, marginBottom: 0 }}>
-                      {item.description}
-                    </Paragraph>
-                  </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                  <Tag color="blue" style={{ fontSize: isMobile ? 10 : 11, marginInlineEnd: 0 }}>
+                    {item.category || 'Дайджест'}
+                  </Tag>
                 </div>
+                <Text strong style={{ fontSize: isMobile ? 13 : 14, color: '#0A2B4E', display: 'block', marginBottom: 6 }}>
+                  {item.title}
+                </Text>
+                <Paragraph type="secondary" style={{ marginTop: 0, fontSize: isMobile ? 11 : 12, marginBottom: 0, color: '#0A2B4E' }}>
+                  {item.description}
+                </Paragraph>
               </div>
             ))}
             <Button 
               type="link" 
               size={isMobile ? 'small' : 'middle'} 
-              style={{ paddingLeft: 0, marginTop: 8, color: '#4A90E2' }}
+              style={{ paddingLeft: 0, marginTop: 12, color: '#fff' }}
               onClick={goToDigest}
             >
               Все дайджесты →
