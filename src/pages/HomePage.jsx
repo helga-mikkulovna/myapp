@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Row, Col, Card, Tag, Space, Button, Skeleton, Divider, Typography, Spin } from 'antd'
-import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined, RiseOutlined } from '@ant-design/icons'
+import { CalendarOutlined, EnvironmentOutlined, ArrowRightOutlined, RiseOutlined, EyeOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import { directusApi } from '../api/directusClient'
 
@@ -68,17 +68,52 @@ const HomePage = () => {
   const goToCatalog = () => navigate('/catalog')
   const goToDigest = () => navigate('/digests')
 
+  const formatPublicationDateTime = (item) => {
+    if (!item?.date) return ''
+
+    const parsedDate = new Date(item.date)
+    if (Number.isNaN(parsedDate.getTime())) {
+      return item.date
+    }
+
+    const datePart = parsedDate.toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    const timePart = parsedDate.toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    return `${datePart}, ${timePart}`
+  }
+
+  const getNewsTags = (item) => {
+    if (Array.isArray(item?.categories) && item.categories.length > 0) {
+      return item.categories
+    }
+
+    if (typeof item?.category === 'string' && item.category.trim()) {
+      return item.category.split(',').map(tag => tag.trim()).filter(Boolean)
+    }
+
+    return []
+  }
+
+  const getNewsViews = (item) => item?.views ?? item?.view_count ?? item?.metadata?.views ?? 0
+
   return (
     <div>
       <Row gutter={[isMobile ? 16 : 24, isMobile ? 16 : 24]}>
         {/* Лента новостей */}
         <Col xs={24} lg={16}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-            <Title level={isMobile ? 4 : 3} style={{ color: '#0A2B4E', margin: 0 }}>
-              🧊 Последние новости
+            <Title level={isMobile ? 4 : 3} style={{ color: '#0A2B4E', margin: '0px 0px 15px 10px', fontSize: '30px' }}>
+              Последние новости
             </Title>
             {!isMobile && (
-              <Button type="link" onClick={goToCatalog} style={{ color: '#4A90E2' }}>
+              <Button type="link" onClick={goToCatalog} style={{ color: 'rgb(40 105 180)', fontSize: '17px', marginBottom: '5px'}}>
                 Все новости →
               </Button>
             )}
@@ -110,26 +145,35 @@ const HomePage = () => {
                       </Col>
                     )}
                     <Col xs={24} sm={item.image_url && !isMobile ? 18 : 24}>
-                      <Space wrap style={{ marginBottom: 8 }}>
-                        <Tag color="#4A90E2" style={{ fontSize: isMobile ? 11 : 12 }}>
-                          {item.category}
-                        </Tag>
+                      <Space wrap style={{ marginBottom: 10 }} size={[12, 8]}>
                         <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
-                          <CalendarOutlined /> {item.date}
+                          <CalendarOutlined /> {formatPublicationDateTime(item)}
                         </Text>
                         <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
                           <EnvironmentOutlined /> {item.source}
                         </Text>
+                        <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                          <EyeOutlined /> {getNewsViews(item).toLocaleString('ru-RU')}
+                        </Text>
                       </Space>
-                      <Title level={isMobile ? 5 : 4} style={{ margin: '8px 0' }}>
+
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+                        {getNewsTags(item).map((tag) => (
+                          <Tag key={tag} color="#4A90E2" style={{ fontSize: isMobile ? 11 : 12, marginInlineEnd: 0 }}>
+                            {tag}
+                          </Tag>
+                        ))}
+                      </div>
+
+                      <Title level={isMobile ? 5 : 4} style={{ margin: '0 0 8px' }}>
                         {item.title}
                       </Title>
-                      <Paragraph 
-                        ellipsis={{ rows: isMobile ? 2 : 3 }} 
+                      <Paragraph
+                        ellipsis={{ rows: isMobile ? 2 : 3 }}
                         type="secondary"
-                        style={{ fontSize: isMobile ? 12 : 14, marginBottom: 8 }}
+                        style={{ fontSize: isMobile ? 12 : 14, marginBottom: 12 }}
                       >
-                        {item.description}
+                        {item.description || 'Краткая выжимка из статьи.'}
                       </Paragraph>
                       <Button 
                         type="link" 
