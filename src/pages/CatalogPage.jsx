@@ -245,13 +245,7 @@ const CatalogPage = () => {
         <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: 0 }}>
           Каталог новостей
         </Title>
-        {!isMobile && (
-          <Badge count={filters.categories.length + filters.sources.length + (filters.search ? 1 : 0) + (filters.dateRange ? 1 : 0)}>
-            <Button icon={<FilterOutlined />} onClick={() => setFilterModalOpen(true)}>
-              Активные фильтры
-            </Button>
-          </Badge>
-        )}
+       
       </div>
       
       <Row gutter={[24, 24]}>
