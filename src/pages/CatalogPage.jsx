@@ -12,7 +12,8 @@ import {
   EnvironmentOutlined,
   SearchOutlined,
   ClearOutlined,
-  EyeOutlined
+  EyeOutlined,
+  ArrowRightOutlined 
 } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import { directusApi } from '../api/directusClient'
@@ -242,7 +243,7 @@ const CatalogPage = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
-        <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: 0 }}>
+        <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: '0px 0px 15px 10px' }}>
           Каталог новостей
         </Title>
        
@@ -398,35 +399,46 @@ const CatalogPage = () => {
                         </Col>
                       )}
                       <Col xs={24} sm={item.image_url ? 18 : 24}>
-                        <Space wrap style={{ marginBottom: 8 }}>
-                          {item.category && (
-                            <Tag color={getCategoryColor(item.category)}>
-                              {getCategoryLabel(item.category)}
-                            </Tag>
-                          )}
-                          <Tag icon={<CalendarOutlined />} color="default">
-                            {item.date}
-                          </Tag>
-                          <Tag icon={<EnvironmentOutlined />} color="default">
-                            {item.source}
-                          </Tag>
+                        {/* Строка 1: дата, источник, просмотры */}
+                        <Space wrap style={{ marginBottom: 10 }} size={[12, 8]}>
+                          <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                            <CalendarOutlined /> {item.date}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                            <EnvironmentOutlined /> {item.source}
+                          </Text>
+                          <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
+                            <EyeOutlined /> {(item.views ?? item.view_count ?? 0).toLocaleString('ru-RU')}
+                          </Text>
                         </Space>
-                        <Title level={isMobile ? 5 : 4} style={{ margin: '8px 0' }}>
+
+                        {/* Строка 2: теги */}
+                        {item.category && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+                            {item.category.split(',').map(tag => tag.trim()).filter(Boolean).map(tag => (
+                              <Tag key={tag} color={getCategoryColor(tag)} style={{ fontSize: isMobile ? 11 : 12, marginInlineEnd: 0 }}>
+                                {getCategoryLabel(tag)}
+                              </Tag>
+                            ))}
+                          </div>
+                        )}
+
+                        <Title level={isMobile ? 5 : 4} style={{ margin: '0 0 8px' }}>
                           {item.title}
                         </Title>
-                        <Text type="secondary">
+                        <Text type="secondary" style={{ fontSize: isMobile ? 12 : 14 }}>
                           {item.description?.substring(0, isMobile ? 100 : 150)}
                           {item.description?.length > (isMobile ? 100 : 150) && '...'}
                         </Text>
                         <div style={{ marginTop: 12 }}>
-                          <Button 
-  type="link" 
-  style={{ paddingLeft: 0, color: '#0645AD' }}
-  icon={<EyeOutlined />}
-  onClick={() => navigate(`/news/${item.id}`)}
->
-  Читать далее
-</Button>
+                          <Button
+                            type="link"
+                            size={isMobile ? 'small' : 'middle'}
+                            style={{ paddingLeft: 0, color: '#4A90E2' }}
+                            onClick={() => navigate(`/news/${item.id}`)}
+                          >
+                            Читать далее <ArrowRightOutlined />
+                          </Button>
                         </div>
                       </Col>
                     </Row>

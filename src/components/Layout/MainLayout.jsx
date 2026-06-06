@@ -17,6 +17,36 @@ const { Text } = Typography
 
 const BRAND_TEXT = 'Пульс Арктики'
 
+const AuroraIcon = ({ size = 32 }) => (
+  <svg viewBox="-5 -3 165 102" height={size} width={size * (200 / 175)} aria-label="Aurora borealis" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      {[
+        ['al1','#1a6abf'],['al2','#1970b7'],['al3','#1876af'],
+        ['al4','#16829f'],['al5','#158897'],['al6','#148e8f'],
+        ['al7','#129487'],['al8','#119a7e'],['al9','#10a076'],
+        ['al10','#0fa570'],['al11','#0faa68'],['al12','#0faa68'],
+      ].map(([id, color]) => (
+        <linearGradient key={id} id={id} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stopColor={color} stopOpacity="0.05" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.92" />
+        </linearGradient>
+      ))}
+    </defs>
+    <rect fill="url(#al1)"  height="77" rx="4.5" transform="rotate(-4,   4.5, 92)" width="9" x="0"   y="15" />
+    <rect fill="url(#al2)"  height="80" rx="4.5" transform="rotate(-3,  17.5, 91)" width="9" x="13"  y="11" />
+    <rect fill="url(#al3)"  height="81" rx="4.5" transform="rotate(-2,  30.5, 89)" width="9" x="26"  y="8"  />
+    <rect fill="url(#al4)"  height="82" rx="4.5" transform="rotate(-1,  43.5, 89)" width="9" x="39"  y="7"  />
+    <rect fill="url(#al5)"  height="81" rx="4.5" transform="rotate( 0,  56.5, 89)" width="9" x="52"  y="8"  />
+    <rect fill="url(#al6)"  height="80" rx="4.5" transform="rotate( 1,  69.5, 91)" width="9" x="65"  y="11" />
+    <rect fill="url(#al7)"  height="77" rx="4.5" transform="rotate( 2,  82.5, 92)" width="9" x="78"  y="15" />
+    <rect fill="url(#al8)"  height="75" rx="4.5" transform="rotate( 3,  95.5, 94)" width="9" x="91"  y="19" />
+    <rect fill="url(#al9)"  height="73" rx="4.5" transform="rotate( 4,108.5, 95)" width="9" x="104" y="22" />
+    <rect fill="url(#al10)" height="72" rx="4.5" transform="rotate( 5,121.5, 95)" width="9" x="117" y="23" />
+    <rect fill="url(#al11)" height="73" rx="4.5" transform="rotate( 4,134.5, 95)" width="9" x="130" y="22" />
+    <rect fill="url(#al12)" height="75" rx="4.5" transform="rotate( 3,147.5, 94)" width="9" x="143" y="19" />
+  </svg>
+)
+
 const COLORS = {
   textDarkBlue: '#0A2B4E',
   pillBg: 'rgba(247, 247, 247, 0.9)',
@@ -194,8 +224,9 @@ const MainLayout = ({ children }) => {
           border: `1px solid ${COLORS.pillBorder}`,
         }}>
           {/* Логотип */}
-          <Link to="/" style={{ color: COLORS.textDarkBlue, fontSize: isMobile ? '18px' : '22px', fontWeight: 'bold', textDecoration: 'none' }}>
-            {BRAND_TEXT}
+          <Link to="/" style={{ color: COLORS.textDarkBlue, fontSize: isMobile ? '18px' : '22px', fontWeight: 'bold', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <AuroraIcon size={isMobile ? 26 : 40} />
+              {BRAND_TEXT}
           </Link>
 
           {/* Десктопное меню */}

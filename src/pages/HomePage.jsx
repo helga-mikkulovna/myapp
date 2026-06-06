@@ -203,7 +203,7 @@ const HomePage = () => {
         <Col xs={24} lg={8}>
           {/* Дайджест дня */}
           <Card 
-            title={<span style={{ fontSize: isMobile ? 14 : 20, color: 'rgb(10, 43, 78)' }}>Дайджест дня</span>}
+            title={<span style={{ fontSize: isMobile ? 14 : 20, color: 'rgb(10, 43, 78)' }}>Повестка дня</span>}
             style={{ 
               background: 'linear-gradient(rgb(175 210 255) 0%, rgb(32 216 191 / 60%) 100%)',
               borderRadius: 16,
