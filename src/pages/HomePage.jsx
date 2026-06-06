@@ -205,7 +205,7 @@ const HomePage = () => {
           <Card 
             title={<span style={{ fontSize: isMobile ? 14 : 20, color: 'rgb(10, 43, 78)' }}>Дайджест дня</span>}
             style={{ 
-              background: 'linear-gradient(rgb(105 175 250) 0%, rgb(30 215 215) 100%)',
+              background: 'linear-gradient(rgb(175 210 255) 0%, rgb(32 216 191 / 60%) 100%)',
               borderRadius: 16,
               marginBottom: 24
             }}
@@ -240,7 +240,7 @@ const HomePage = () => {
             <Button 
               type="link" 
               size={isMobile ? 'small' : 'middle'} 
-              style={{ paddingLeft: 0, marginTop: 12, color: '#fff' }}
+              style={{ paddingLeft: 0, marginTop: 12, color: '#0A2B4E' }}
               onClick={goToDigest}
             >
               Все дайджесты →
@@ -281,13 +281,7 @@ const HomePage = () => {
                   }} />
                 </div>
               </div>
-            ))}
-            {isMobile && <Divider style={{ margin: '12px 0' }} />}
-            <div style={{ marginTop: isMobile ? 12 : 0 }}>
-              <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
-                🔥 Горячие темы: климат, Севморпуть, международные соглашения
-              </Text>
-            </div>
+            ))}            
           </Card>
         </Col>
       </Row>

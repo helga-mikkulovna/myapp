@@ -21,13 +21,13 @@ const { Title, Text } = Typography
 const { RangePicker } = DatePicker
 
 const CATEGORIES = [
-  { key: 'ecology', label: '🌿 Экология', color: '#2E8B57' },
-  { key: 'economy', label: '💰 Экономика', color: '#4A90E2' },
-  { key: 'infrastructure', label: '🏗️ Инфраструктура', color: '#0A2B4E' },
-  { key: 'science', label: '🔬 Наука', color: '#00A8A8' },
-  { key: 'international', label: '🌍 Международное сотрудничество', color: '#4A90E2' },
-  { key: 'indigenous', label: '👥 Коренные народы', color: '#2E8B57' },
-  { key: 'climate', label: '🌡️ Климат', color: '#00A8A8' },
+  { key: 'ecology', label: 'Экология', color: '#2E8B57' },
+  { key: 'economy', label: 'Экономика', color: '#4A90E2' },
+  { key: 'infrastructure', label: 'Инфраструктура', color: '#0A2B4E' },
+  { key: 'science', label: 'Наука', color: '#00A8A8' },
+  { key: 'international', label: 'Международное сотрудничество', color: '#4A90E2' },
+  { key: 'indigenous', label: 'Коренные народы', color: '#2E8B57' },
+  { key: 'climate', label: 'Климат', color: '#00A8A8' },
 ]
 
 const SOURCES_LIST = [
@@ -156,7 +156,7 @@ const CatalogPage = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Поиск */}
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>🔍 Поиск</Text>
+        <Text strong style={{ display: 'block', marginBottom: 8 }}>Поиск</Text>
         <Input.Search 
           placeholder="По заголовкам и тексту..."
           allowClear
@@ -168,7 +168,7 @@ const CatalogPage = () => {
 
       {/* 7 тематических кнопок */}
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>📂 Темы</Text>
+        <Text strong style={{ display: 'block', marginBottom: 8 }}>Темы</Text>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {CATEGORIES.map(cat => (
             <Button
@@ -190,7 +190,7 @@ const CatalogPage = () => {
 
       {/* Диапазон дат */}
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>📅 Период</Text>
+        <Text strong style={{ display: 'block', marginBottom: 8 }}>Период</Text>
         <RangePicker 
           style={{ width: '100%' }}
           size={isMobile ? 'middle' : 'large'}
@@ -202,7 +202,7 @@ const CatalogPage = () => {
 
       {/* Источники */}
       <div>
-        <Text strong style={{ display: 'block', marginBottom: 8 }}>📡 Источники</Text>
+        <Text strong style={{ display: 'block', marginBottom: 8 }}>Источники</Text>
         <Select
           mode="multiple"
           style={{ width: '100%' }}
@@ -243,7 +243,7 @@ const CatalogPage = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
         <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: 0 }}>
-          📰 Каталог новостей
+          Каталог новостей
         </Title>
         {!isMobile && (
           <Badge count={filters.categories.length + filters.sources.length + (filters.search ? 1 : 0) + (filters.dateRange ? 1 : 0)}>
@@ -319,7 +319,7 @@ const CatalogPage = () => {
               {isLoading || isFetching ? (
                 <Spin size="small" /> 
               ) : (
-                <>📊 Найдено: <strong>{data?.meta?.total_count || 0}</strong> новостей</>
+                <>Найдено: <strong>{data?.meta?.total_count || 0}</strong> новостей</>
               )}
             </Text>
             
