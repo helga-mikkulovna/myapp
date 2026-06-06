@@ -402,7 +402,11 @@ const CatalogPage = () => {
                         {/* Строка 1: дата, источник, просмотры */}
                         <Space wrap style={{ marginBottom: 10 }} size={[12, 8]}>
                           <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
-                            <CalendarOutlined /> {item.date}
+                            <CalendarOutlined /> {(() => {
+                                const d = new Date(item.date.replace(' ', 'T'))
+                                if (isNaN(d.getTime())) return item.date
+                                return `${d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })}, ${d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
+                              })()}
                           </Text>
                           <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12 }}>
                             <EnvironmentOutlined /> {item.source}
