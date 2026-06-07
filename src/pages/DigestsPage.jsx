@@ -233,7 +233,7 @@ const DigestsPage = () => {
       {/* Заголовок */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: '0px 0px 15px 10px' }}>
+          <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: isMobile ? '8px 0px 15px 10px' : '0px 0px 15px 10px' }}>
             Архив дайджестов
           </Title>
         </div>
@@ -263,14 +263,14 @@ const DigestsPage = () => {
       )}
 
       {/* Фильтр */}
-      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         {activeTab !== 'monthly' ? (
           <RangePicker
             value={dateRange}
             onChange={(dates) => setDateRange(dates || [null, null])}
             placeholder={['Дата от', 'Дата до']}
             format="DD.MM.YYYY"
-            style={{ width: isMobile ? '100%' : 280 }}
+            style={{ width: 280 }}
           />
         ) : (
           <Select
@@ -278,16 +278,12 @@ const DigestsPage = () => {
             onChange={setSelectedMonth}
             placeholder="Выберите месяц"
             allowClear
-            style={{ width: isMobile ? '100%' : 200 }}
+            style={{ width: 200 }}
             options={MONTHS}
           />
         )}
         {hasFilter && (
-          <Button
-            icon={<CloseOutlined />}
-            onClick={resetFilter}
-            size="middle"
-          >
+          <Button icon={<CloseOutlined />} onClick={resetFilter} size="middle">
             Сбросить
           </Button>
         )}
@@ -314,7 +310,12 @@ const DigestsPage = () => {
               type={activeTab === item.key ? 'primary' : 'default'}
               block
               onClick={() => { handleTabChange(item.key); setMobileMenuOpen(false) }}
-              style={{ textAlign: 'left', height: 'auto', padding: '12px' }}
+              style={{
+                textAlign: 'left',
+                height: 'auto',
+                padding: '12px',
+                ...(activeTab === item.key && { background: 'rgb(60, 127, 199)', borderColor: 'rgb(60, 127, 199)' })
+              }}
             >
               {item.label}
               <Tag style={{ marginLeft: 8 }}>{item.count}</Tag>
