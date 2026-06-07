@@ -1,9 +1,32 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Row, Col, Card, Typography, Tabs, Button, Space, Tag, Empty, Spin, Drawer, Avatar, Tooltip, List } from 'antd'
-import { CalendarOutlined, FileTextOutlined, MenuOutlined, EyeOutlined, ClockCircleOutlined, FireOutlined } from '@ant-design/icons'
+import { Row, Col, Card, Typography, Tabs, Button, Space, Tag, Empty, Spin, Drawer, DatePicker, Select } from 'antd'
+import { CalendarOutlined, FileTextOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
+import isBetween from 'dayjs/plugin/isBetween'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+dayjs.extend(isBetween)
+dayjs.extend(isSameOrBefore)
+dayjs.extend(isSameOrAfter)
 
 const { Title, Paragraph, Text } = Typography
+const { RangePicker } = DatePicker
+
+const MONTHS = [
+  { value: 'Январь', label: 'Январь' },
+  { value: 'Февраль', label: 'Февраль' },
+  { value: 'Март', label: 'Март' },
+  { value: 'Апрель', label: 'Апрель' },
+  { value: 'Май', label: 'Май' },
+  { value: 'Июнь', label: 'Июнь' },
+  { value: 'Июль', label: 'Июль' },
+  { value: 'Август', label: 'Август' },
+  { value: 'Сентябрь', label: 'Сентябрь' },
+  { value: 'Октябрь', label: 'Октябрь' },
+  { value: 'Ноябрь', label: 'Ноябрь' },
+  { value: 'Декабрь', label: 'Декабрь' },
+]
 
 const DigestsPage = () => {
   const navigate = useNavigate()
@@ -12,200 +35,207 @@ const DigestsPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Фильтры
+  const [dateRange, setDateRange] = useState([null, null])   // для daily и weekly
+  const [selectedMonth, setSelectedMonth] = useState(null)   // для monthly
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Данные дайджестов с топ-3 новостями
+  // Сброс фильтров при смене таба
+  const handleTabChange = (key) => {
+    setActiveTab(key)
+    setDateRange([null, null])
+    setSelectedMonth(null)
+  }
+
   const digests = {
     daily: [
-      { 
-        id: 1, 
-        title: 'Дайджест за 5 июня 2026', 
+      {
+        id: 1,
         period: '5 июня 2026',
-        date: '2026-06-05', 
-        summary: 'Основные события Арктики за день: экологические инициативы, новые маршруты Севморпути, встречи глав регионов. Подписано соглашение о сотрудничестве между Россией и Китаем в области арктических исследований.', 
+        date: '2026-06-05',
         count: 12,
         sources: ['ТАСС', 'РИА Новости', 'Коммерсантъ'],
         topNews: [
-          { id: 101, title: 'Россия и Китай укрепляют сотрудничество в Арктике очень длинное название которое может не поместиться', views: 3452, category: 'Политика' },
-          { id: 102, title: 'Новая арктическая экспедиция стартовала из Мурманска', views: 2891, category: 'Наука' },
-          { id: 103, title: 'Новые экологические стандарты', views: 2156, category: 'Экология' },
+          { id: 101, title: 'Россия и Китай укрепляют сотрудничество в Арктике', summary: 'Подписано соглашение о развитии Северного морского пути и совместных научных проектах в области изучения вечной мерзлоты.', tags: ['Политика', 'Арктика'] },
+          { id: 102, title: 'Новая арктическая экспедиция стартовала из Мурманска', summary: 'Учёные из России, Китая и Индии отправились исследовать изменения климата. Экспедиция продлится три месяца.', tags: ['Наука', 'Климат'] },
+          { id: 103, title: 'Новые экологические стандарты для арктических регионов', summary: 'Минприроды ужесточает требования к промышленным предприятиям, работающим в Арктической зоне.', tags: ['Экология'] },
         ]
       },
-      { 
-        id: 2, 
-        title: 'Дайджест за 4 июня 2026', 
+      {
+        id: 2,
         period: '4 июня 2026',
-        date: '2026-06-04', 
-        summary: 'Международное сотрудничество, научные экспедиции, инфраструктурные проекты в Арктической зоне. Запущена новая полярная станция на Шпицбергене.', 
+        date: '2026-06-04',
         count: 8,
         sources: ['ТАСС', 'Интерфакс'],
         topNews: [
-          { id: 201, title: 'Запущена новая полярная станция на Шпицбергене', views: 1872, category: 'Инфраструктура' },
-          { id: 202, title: 'Учёные завершили исследование вечной мерзлоты', views: 1567, category: 'Наука' },
+          { id: 201, title: 'Запущена новая полярная станция на Шпицбергене', summary: 'Российские учёные открыли новую исследовательскую базу для мониторинга климатических изменений в высоких широтах.', tags: ['Инфраструктура', 'Наука'] },
+          { id: 202, title: 'Учёные завершили исследование вечной мерзлоты', summary: 'Результаты трёхлетнего исследования указывают на ускоренное таяние грунта в Сибири и северных регионах России.', tags: ['Наука', 'Климат'] },
         ]
       },
-      { 
-        id: 3, 
-        title: 'Дайджест за 3 июня 2026', 
+      {
+        id: 3,
         period: '3 июня 2026',
-        date: '2026-06-03', 
-        summary: 'Климатические изменения, встречи глав регионов, новые исследования вечной мерзлоты. Учёные зафиксировали рекордное таяние льдов в регионе.', 
+        date: '2026-06-03',
         count: 15,
         sources: ['РИА Новости', 'Наука и жизнь'],
         topNews: [
-          { id: 301, title: 'Учёные зафиксировали рекордное таяние льдов', views: 2100, category: 'Климат' },
-          { id: 302, title: 'Встреча глав арктических регионов', views: 1450, category: 'Политика' },
-          { id: 303, title: 'Новые данные о вечной мерзлоте', views: 1200, category: 'Наука' },
+          { id: 301, title: 'Учёные зафиксировали рекордное таяние льдов', summary: 'Температура в Арктике побила 100-летний максимум. Площадь морского льда сократилась до исторического минимума для этого времени года.', tags: ['Климат', 'Арктика'] },
+          { id: 302, title: 'Встреча глав арктических регионов', summary: 'На совещании обсудили вопросы инфраструктурного развития, экологической безопасности и привлечения инвестиций.', tags: ['Политика'] },
+          { id: 303, title: 'Новые данные о вечной мерзлоте', summary: 'Опубликованы результаты масштабного мониторинга состояния грунта в арктических регионах за последние пять лет.', tags: ['Наука'] },
         ]
       },
-      { 
-        id: 4, 
-        title: 'Дайджест за 2 июня 2026', 
+      {
+        id: 4,
         period: '2 июня 2026',
-        date: '2026-06-02', 
-        summary: 'Развитие Северного морского пути, новые инвестиционные проекты. Объявлено о строительстве новых портовых терминалов.', 
+        date: '2026-06-02',
         count: 10,
         sources: ['Коммерсантъ', 'Интерфакс'],
         topNews: [
-          { id: 401, title: 'Новые портовые терминалы на Севморпути', views: 980, category: 'Экономика' },
-          { id: 402, title: 'Инвестиции в арктические проекты', views: 870, category: 'Экономика' },
+          { id: 401, title: 'Новые портовые терминалы на Севморпути', summary: 'Объявлено о строительстве трёх новых терминалов для обработки грузов на ключевых участках Северного морского пути.', tags: ['Экономика', 'Инфраструктура'] },
+          { id: 402, title: 'Инвестиции в арктические проекты', summary: 'Общий объём заявленных вложений в развитие арктической инфраструктуры превысил 500 миллиардов рублей.', tags: ['Экономика'] },
         ]
       },
-      { 
-        id: 5, 
-        title: 'Дайджест за 1 июня 2026', 
+      {
+        id: 5,
         period: '1 июня 2026',
-        date: '2026-06-01', 
-        summary: 'Старт летней навигации на Севморпути. Первые караваны судов отправились по маршруту.', 
+        date: '2026-06-01',
         count: 7,
         sources: ['ТАСС'],
         topNews: [
-          { id: 501, title: 'Первые караваны судов отправились по Севморпути', views: 750, category: 'Инфраструктура' },
+          { id: 501, title: 'Первые караваны судов отправились по Севморпути', summary: 'Стартовала летняя навигационная кампания. Первые конвои взяли курс на восток в сопровождении атомных ледоколов.', tags: ['Инфраструктура', 'Судоходство'] },
         ]
       },
     ],
     weekly: [
-      { 
-        id: 1, 
-        title: 'Недельный дайджест: 1-7 июня 2026', 
+      {
+        id: 1,
         period: '1–7 июня 2026',
-        date: '2026-06-01/2026-06-07', 
-        summary: 'Ключевые события недели: форумы, соглашения, запуски проектов в арктических регионах. Подведены итоги международного арктического форума в Санкт-Петербурге.', 
+        date: '2026-06-01/2026-06-07',
         count: 45,
         sources: ['ТАСС', 'РИА Новости', 'Коммерсантъ', 'Интерфакс'],
         topNews: [
-          { id: 101, title: 'Международный арктический форум в Санкт-Петербурге', views: 5600, category: 'Политика' },
-          { id: 102, title: 'Запуск ледокола "Арктика-2"', views: 4300, category: 'Инфраструктура' },
-          { id: 103, title: 'Соглашение России и Китая по Севморпути', views: 3900, category: 'Экономика' },
+          { id: 101, title: 'Международный арктический форум в Санкт-Петербурге', summary: 'Завершился крупнейший за последние годы форум с участием 15 государств. Подписано 12 межправительственных соглашений.', tags: ['Политика', 'Арктика'] },
+          { id: 102, title: 'Запуск ледокола "Арктика-2"', summary: 'На Балтийском заводе спущен на воду новый атомный ледокол проекта 22220. Судно обеспечит круглогодичную навигацию по Севморпути.', tags: ['Инфраструктура'] },
+          { id: 103, title: 'Соглашение России и Китая по Севморпути', summary: 'Стороны договорились о совместном развитии инфраструктуры и синхронизации транспортных коридоров вдоль северного маршрута.', tags: ['Экономика', 'Политика'] },
         ]
       },
-      { 
-        id: 2, 
-        title: 'Недельный дайджест: 25-31 мая 2026', 
+      {
+        id: 2,
         period: '25–31 мая 2026',
-        date: '2026-05-25/2026-05-31', 
-        summary: 'Обзор главных арктических новостей за неделю: экология, экономика, наука. Новые исследования климата и их влияние на регион.', 
+        date: '2026-05-25/2026-05-31',
         count: 38,
         sources: ['ТАСС', 'РИА Новости'],
         topNews: [
-          { id: 201, title: 'Новые исследования климата в Арктике', views: 3200, category: 'Климат' },
-          { id: 202, title: 'Экологические инициативы в регионе', views: 2800, category: 'Экология' },
+          { id: 201, title: 'Новые исследования климата в Арктике', summary: 'Международная группа учёных опубликовала доклад о темпах потепления в полярной зоне. Прогнозы оказались тревожнее ожидаемых.', tags: ['Климат', 'Наука'] },
+          { id: 202, title: 'Экологические инициативы в регионе', summary: 'Несколько арктических государств анонсировали совместные меры по сокращению выбросов и защите морских экосистем.', tags: ['Экология'] },
         ]
       },
-      { 
-        id: 3, 
-        title: 'Недельный дайджест: 18-24 мая 2026', 
+      {
+        id: 3,
         period: '18–24 мая 2026',
-        date: '2026-05-18/2026-05-24', 
-        summary: 'Международное сотрудничество, инфраструктурные проекты. Визит делегации Китая в Мурманск.', 
+        date: '2026-05-18/2026-05-24',
         count: 42,
         sources: ['Коммерсантъ', 'Интерфакс'],
         topNews: [
-          { id: 301, title: 'Визит делегации Китая в Мурманск', views: 2500, category: 'Политика' },
-          { id: 302, title: 'Новые проекты в арктической зоне', views: 2100, category: 'Экономика' },
+          { id: 301, title: 'Визит делегации Китая в Мурманск', summary: 'Представители китайских государственных компаний осмотрели портовую инфраструктуру и провели переговоры о долгосрочном сотрудничестве.', tags: ['Политика', 'Экономика'] },
+          { id: 302, title: 'Новые проекты в арктической зоне', summary: 'Правительство утвердило перечень приоритетных инвестиционных проектов для развития арктических территорий до 2030 года.', tags: ['Экономика'] },
         ]
       },
     ],
     monthly: [
-      { 
-        id: 1, 
-        title: 'Майский дайджест 2026', 
+      {
+        id: 1,
         period: 'Май 2026',
-        date: 'Май 2026', 
-        summary: 'Все важные события Арктики за май: аналитика, интервью, итоги работы за месяц. Обзор ключевых решений в области арктической политики.', 
+        date: 'Май 2026',
         count: 120,
         sources: ['ТАСС', 'РИА Новости', 'Коммерсантъ', 'Интерфакс', 'Арктический совет'],
         topNews: [
-          { id: 101, title: 'Итоги весенней сессии Арктического совета', views: 8900, category: 'Политика' },
-          { id: 102, title: 'Ключевые решения в области арктической политики', views: 7200, category: 'Политика' },
-          { id: 103, title: 'Новые экологические нормы для Арктики', views: 6500, category: 'Экология' },
+          { id: 101, title: 'Итоги весенней сессии Арктического совета', summary: 'Восемь государств-членов согласовали новую дорожную карту устойчивого развития Арктики до 2035 года. Главной темой стало изменение климата.', tags: ['Политика', 'Арктика'] },
+          { id: 102, title: 'Ключевые решения в области арктической политики', summary: 'Правительства арктических стран приняли скоординированные меры по регулированию судоходства и охране окружающей среды.', tags: ['Политика'] },
+          { id: 103, title: 'Новые экологические нормы для Арктики', summary: 'Введены обязательные стандарты для добывающих компаний: нулевой сброс загрязняющих веществ и обязательный экологический мониторинг.', tags: ['Экология'] },
         ]
       },
-      { 
-        id: 2, 
-        title: 'Апрельский дайджест 2026', 
+      {
+        id: 2,
         period: 'Апрель 2026',
-        date: 'Апрель 2026', 
-        summary: 'Экологические инициативы, запуск новых программ, международные соглашения. Итоги весенней сессии арктического совета.', 
+        date: 'Апрель 2026',
         count: 98,
         sources: ['ТАСС', 'РИА Новости'],
         topNews: [
-          { id: 201, title: 'Запуск новых программ развития Арктики', views: 5400, category: 'Экономика' },
-          { id: 202, title: 'Международные соглашения по Арктике', views: 4800, category: 'Политика' },
+          { id: 201, title: 'Запуск новых программ развития Арктики', summary: 'Федеральная программа включает финансирование инфраструктуры, науки и социальной поддержки коренных народов Севера.', tags: ['Экономика'] },
+          { id: 202, title: 'Международные соглашения по Арктике', summary: 'Подписан ряд двусторонних договоров о сотрудничестве в сфере освоения ресурсов и охраны морской среды.', tags: ['Политика'] },
         ]
       },
     ],
   }
 
+  const summaryByTab = {
+    daily: 'Основные события дня: ',
+    weekly: 'Основные события недели: ',
+    monthly: 'Основные события месяца: ',
+  }
+
+  const numberColors = ['rgb(60 127 199)', 'rgb(56 159 160)', 'rgb(60 186 133)']
+
+  // Логика фильтрации
+  const getFilteredDigests = () => {
+    const all = digests[activeTab]
+
+    if (activeTab === 'daily') {
+      const [from, to] = dateRange
+      if (!from || !to) return all
+      return all.filter(d => dayjs(d.date).isBetween(from, to, 'day', '[]'))
+    }
+
+    if (activeTab === 'weekly') {
+      const [from, to] = dateRange
+      if (!from || !to) return all
+      return all.filter(d => {
+        const [start, end] = d.date.split('/')
+        // Неделя попадает в диапазон если хоть частично пересекается
+        return dayjs(start).isSameOrBefore(to, 'day') && dayjs(end).isSameOrAfter(from, 'day')
+      })
+    }
+
+    if (activeTab === 'monthly') {
+      if (!selectedMonth) return all
+      return all.filter(d => d.period.startsWith(selectedMonth))
+    }
+
+    return all
+  }
+
+  const filteredDigests = getFilteredDigests()
+  const hasFilter = (activeTab !== 'monthly' && (dateRange[0] || dateRange[1])) ||
+                    (activeTab === 'monthly' && selectedMonth)
+
+  const resetFilter = () => {
+    setDateRange([null, null])
+    setSelectedMonth(null)
+  }
+
   const tabItems = [
-    { key: 'daily', label: isMobile ? '📅 День' : '📅 Ежедневные', count: digests.daily.length },
-    { key: 'weekly', label: isMobile ? '📆 Неделя' : '📆 Еженедельные', count: digests.weekly.length },
-    { key: 'monthly', label: isMobile ? '📊 Месяц' : '📊 Ежемесячные', count: digests.monthly.length },
+    { key: 'daily', label: isMobile ? 'День' : 'Ежедневные', count: digests.daily.length },
+    { key: 'weekly', label: isMobile ? 'Неделя' : 'Еженедельные', count: digests.weekly.length },
+    { key: 'monthly', label: isMobile ? 'Месяц' : 'Ежемесячные', count: digests.monthly.length },
   ]
 
-  const currentDigests = digests[activeTab]
-
-  const openDigest = (digestId, type) => {
-    navigate(`/digests/${type}/${digestId}`)
-  }
-
-  const openNews = (newsId, e) => {
-    e.stopPropagation()
-    navigate(`/news/${newsId}`)
-  }
-
-  const getPeriodIcon = (period) => {
-    if (period.includes('–')) return '📆'
-    if (period.includes('Май') || period.includes('Апрель')) return '📊'
-    return '📅'
-  }
-
-  // Стили для обрезки текста
-  const textEllipsis = {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'normal',
-    wordWrap: 'break-word',
-    wordBreak: 'break-word'
-  }
+  const openDigest = (digestId, type) => navigate(`/digests/${type}/${digestId}`)
+  const openNews = (newsId, e) => { e.stopPropagation(); navigate(`/news/${newsId}`) }
 
   return (
     <div>
       {/* Заголовок */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: 0 }}>
-            📚 Архив дайджестов
+          <Title level={isMobile ? 3 : 2} style={{ color: '#0A2B4E', margin: '0px 0px 15px 10px' }}>
+            Архив дайджестов
           </Title>
-          {!isMobile && (
-            <Text type="secondary" style={{ marginTop: 8, display: 'block' }}>
-              Ежедневные, еженедельные и ежемесячные сводки ключевых событий Арктики
-            </Text>
-          )}
         </div>
         {isMobile && (
           <Button icon={<MenuOutlined />} onClick={() => setMobileMenuOpen(true)}>
@@ -214,18 +244,12 @@ const DigestsPage = () => {
         )}
       </div>
 
-      {isMobile && (
-        <Text type="secondary" style={{ marginBottom: 24, display: 'block' }}>
-          Ежедневные, еженедельные и ежемесячные сводки ключевых событий Арктики
-        </Text>
-      )}
-
       {/* Десктопные табы */}
       {!isMobile && (
-        <Tabs 
-          activeKey={activeTab} 
-          onChange={setActiveTab}
-          style={{ marginBottom: 24 }}
+        <Tabs
+          activeKey={activeTab}
+          onChange={handleTabChange}
+          style={{ marginBottom: 16 }}
           items={tabItems.map(item => ({
             key: item.key,
             label: (
@@ -238,7 +262,43 @@ const DigestsPage = () => {
         />
       )}
 
-      {/* Мобильный Drawer для выбора периода */}
+      {/* Фильтр */}
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        {activeTab !== 'monthly' ? (
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => setDateRange(dates || [null, null])}
+            placeholder={['Дата от', 'Дата до']}
+            format="DD.MM.YYYY"
+            style={{ width: isMobile ? '100%' : 280 }}
+          />
+        ) : (
+          <Select
+            value={selectedMonth}
+            onChange={setSelectedMonth}
+            placeholder="Выберите месяц"
+            allowClear
+            style={{ width: isMobile ? '100%' : 200 }}
+            options={MONTHS}
+          />
+        )}
+        {hasFilter && (
+          <Button
+            icon={<CloseOutlined />}
+            onClick={resetFilter}
+            size="middle"
+          >
+            Сбросить
+          </Button>
+        )}
+        {hasFilter && (
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Найдено: {filteredDigests.length}
+          </Text>
+        )}
+      </div>
+
+      {/* Мобильный Drawer */}
       <Drawer
         title="Выберите период"
         placement="bottom"
@@ -249,14 +309,11 @@ const DigestsPage = () => {
       >
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           {tabItems.map(item => (
-            <Button 
+            <Button
               key={item.key}
               type={activeTab === item.key ? 'primary' : 'default'}
               block
-              onClick={() => {
-                setActiveTab(item.key)
-                setMobileMenuOpen(false)
-              }}
+              onClick={() => { handleTabChange(item.key); setMobileMenuOpen(false) }}
               style={{ textAlign: 'left', height: 'auto', padding: '12px' }}
             >
               {item.label}
@@ -269,190 +326,122 @@ const DigestsPage = () => {
       {/* Контент */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px' }}>
-          <Spin size="large" description="Загрузка дайджестов..." />
+          <Spin size="large" />
         </div>
-      ) : !currentDigests || currentDigests.length === 0 ? (
-        <Empty description="Дайджесты не найдены" />
+      ) : filteredDigests.length === 0 ? (
+        <Empty description="Дайджесты за выбранный период не найдены" />
       ) : (
         <Row gutter={[isMobile ? 12 : 24, isMobile ? 12 : 24]}>
-          {currentDigests.map(digest => (
-            <Col xs={24} sm={12} lg={8} xl={6} key={digest.id}>
-              <Card 
+          {filteredDigests.map(digest => (
+            <Col xs={24} sm={12} lg={8} key={digest.id}>
+              <Card
                 hoverable
-                style={{ borderRadius: 16, height: '100%', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
+                style={{ borderRadius: 16, height: '100%', cursor: 'pointer', display: 'flex', flexDirection: 'column', background: '#d9ebfa' }}
                 styles={{ body: { padding: isMobile ? 16 : 20, flex: 1, display: 'flex', flexDirection: 'column' } }}
                 onClick={() => openDigest(digest.id, activeTab)}
               >
-                {/* Верхняя часть с датой */}
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'space-between',
-                  marginBottom: 16,
-                  flexWrap: 'wrap',
-                  gap: 8
-                }}>
-                  <Space wrap>
-                    <Avatar 
-                      style={{ 
-                        backgroundColor: activeTab === 'daily' ? '#4A90E2' : activeTab === 'weekly' ? '#2E8B57' : '#00A8A8',
-                        fontSize: isMobile ? 16 : 20,
-                        flexShrink: 0
-                      }}
-                      size={isMobile ? 40 : 48}
-                    >
-                      {getPeriodIcon(digest.period)}
-                    </Avatar>
-                    <div>
-                      <Text type="secondary" style={{ fontSize: isMobile ? 11 : 12, display: 'block', ...textEllipsis }}>
-                        <CalendarOutlined /> {digest.period}
-                      </Text>
-                      <div>
-                        <Tag color="gold" style={{ marginTop: 4 }}>
-                          📄 {digest.count} новостей
-                        </Tag>
-                      </div>
-                    </div>
-                  </Space>
-                  <Tooltip title="Читать полностью">
-                    <Button 
-                      type="primary" 
-                      shape="circle" 
-                      icon={<EyeOutlined />}
-                      size={isMobile ? 'small' : 'middle'}
-                      style={{ background: '#4A90E2', flexShrink: 0 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        openDigest(digest.id, activeTab)
-                      }}
-                    />
-                  </Tooltip>
+                {/* Заголовок карточки: дата + кол-во новостей */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, flexWrap: 'wrap', gap: 8 }}>
+                  <Text strong style={{ fontSize: isMobile ? 14 : 16, color: '#0A2B4E', display: 'block' }}>
+                    <CalendarOutlined /> За {digest.period}
+                  </Text>
+                  <Tag style={{ margin: 0, background: 'rgb(171 231 213)', border: '1px solid rgb(52 183 128)', color: 'rgb(37 73 70)' }}>
+                    {digest.count} новостей
+                  </Tag> 
                 </div>
 
-                {/* Заголовок */}
-                <Title 
-                  level={isMobile ? 5 : 4} 
-                  style={{ 
-                    marginBottom: 12,
-                    ...textEllipsis,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical'
-                  }}
-                >
-                  {digest.title}
-                </Title>
 
-                {/* Краткое описание */}
-                <Paragraph 
-                  type="secondary" 
-                  ellipsis={{ rows: isMobile ? 2 : 2 }} 
-                  style={{ 
-                    marginBottom: 16, 
-                    fontSize: isMobile ? 12 : 14,
-                    ...textEllipsis
-                  }}
-                >
-                  {digest.summary}
-                </Paragraph>
+                {/* Подзаголовок по типу дайджеста */}
+                <Text type="secondary" style={{ fontSize: isMobile ? 11 : 13, display: 'block', marginBottom: 10, marginTop: 10, marginLeft: 5 }}>
+                  {summaryByTab[activeTab]}
+                </Text>
 
-                {/* ТОП-3 ПОПУЛЯРНЫЕ НОВОСТИ */}
+                {/* Топ новости */}
                 {digest.topNews && digest.topNews.length > 0 && (
-                  <div style={{ 
-                    marginBottom: 16,
-                    background: '#FFF8E7',
-                    borderRadius: 12,
-                    padding: '12px',
-                    borderLeft: '3px solid #FF6B35'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                      <FireOutlined style={{ color: '#FF6B35', fontSize: 14 }} />
-                      <Text strong style={{ fontSize: 12, color: '#FF6B35' }}>Популярное в дайджесте</Text>
-                    </div>
-                    <List
-                      size="small"
-                      dataSource={digest.topNews.slice(0, 3)}
-                      renderItem={(news, idx) => (
-                        <div 
-                          key={news.id}
-                          style={{ 
-                            padding: '6px 0',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            gap: 8,
-                            borderBottom: idx !== Math.min(digest.topNews.length, 3) - 1 ? '1px solid #FFF0D0' : 'none'
-                          }}
-                          onClick={(e) => openNews(news.id, e)}
-                        >
-                          <div style={{
-                            width: 20,
-                            height: 20,
-                            background: idx === 0 ? '#FFD700' : idx === 1 ? '#C0C0C0' : '#CD7F32',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 10,
-                            fontWeight: 'bold',
-                            color: '#333',
-                            flexShrink: 0,
-                            marginTop: 2
-                          }}>
-                            {idx + 1}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <Text 
-                              style={{ 
-                                fontSize: 12, 
-                                display: 'block',
-                                ...textEllipsis,
-                                whiteSpace: 'normal',
-                                wordBreak: 'break-word'
-                              }}
-                            >
-                              {news.title}
-                            </Text>
-                            <Space size={4} style={{ marginTop: 4 }}>
-                              <Tag color="blue" style={{ fontSize: 9, padding: '0 4px', lineHeight: '16px', margin: 0 }}>
-                                {news.category}
-                              </Tag>
-                              <Text type="secondary" style={{ fontSize: 10 }}>
-                                👁 {news.views}
-                              </Text>
-                            </Space>
-                          </div>
+                  <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {digest.topNews.slice(0, 3).map((news, idx) => (
+                      <div
+                        key={news.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 10,
+                          padding: 12,
+                          borderBottom: idx < Math.min(digest.topNews.length, 3) - 1 ? '1px solid #F0F0F0' : 'none',
+                          cursor: 'pointer',
+                          background: 'white',
+                          borderRadius: '10px'
+                        }}
+                        onClick={(e) => openNews(news.id, e)}
+                      >
+                        <div style={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: '50%',
+                          background: numberColors[idx],
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 11,
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          flexShrink: 0,
+                        }}>
+                          {idx + 1}
                         </div>
-                      )}
-                    />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          {news.tags && news.tags.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 4, marginBottom: 4, overflow: 'hidden' }}>
+                              {news.tags.map(tag => (
+                                <Tag key={tag} color="#4A90E2" style={{ fontSize: 10, padding: '0 5px', lineHeight: '16px', margin: 0, flexShrink: 0 }}>
+                                  {tag}
+                                </Tag>
+                              ))}
+                            </div>
+                          )}
+                          <Text strong style={{ fontSize: isMobile ? 12 : 13, display: 'block', marginBottom: 4, wordBreak: 'break-word' }}>
+                            {news.title}
+                          </Text>
+                          <Paragraph
+                            type="secondary"
+                            ellipsis={{ rows: 2 }}
+                            style={{ fontSize: isMobile ? 11 : 12, margin: 0 }}
+                          >
+                            {news.summary}
+                          </Paragraph>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
 
                 {/* Источники */}
-                <div style={{ marginBottom: 12 }}>
+                <div style={{ marginBottom: 12, marginTop: 'auto' }}>
+                  <Text type="secondary" style={{ fontSize: isMobile ? 10 : 11, display: 'block', marginBottom: 6 }}>
+                    Источники:
+                  </Text>
                   <Space wrap size={[4, 4]}>
                     {digest.sources.slice(0, 3).map(source => (
-                      <Tag key={source} color="blue" style={{ fontSize: isMobile ? 10 : 11 }}>
+                      <Tag key={source} style={{ fontSize: isMobile ? 10 : 11, background: '#F0F4FA', border: '1px solid #C8D8F0', color: '#0A2B4E' }}>
                         {source}
                       </Tag>
                     ))}
                     {digest.sources.length > 3 && (
-                      <Tag>+{digest.sources.length - 3}</Tag>
+                      <Tag style={{ background: '#F0F4FA', border: '1px solid #C8D8F0', color: '#0A2B4E' }}>
+                        +{digest.sources.length - 3}
+                      </Tag>
                     )}
                   </Space>
                 </div>
 
-                {/* Кнопка "Читать полностью" */}
-                <Button 
-                  type="link" 
+                {/* Кнопка */}
+                <Button
+                  type="link"
                   icon={<FileTextOutlined />}
-                  style={{ paddingLeft: 0, color: '#4A90E2', marginTop: 'auto' }}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    openDigest(digest.id, activeTab)
-                  }}
+                  style={{ paddingLeft: 0, color: '#4A90E2' }}
+                  onClick={(e) => { e.stopPropagation(); openDigest(digest.id, activeTab) }}
                 >
-                  Читать полностью →
+                  Читать полностью
                 </Button>
               </Card>
             </Col>
