@@ -263,7 +263,7 @@ const DigestsPage = () => {
       )}
 
       {/* Фильтр */}
-      <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+      <div style={{ marginBottom: 24, display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         {activeTab !== 'monthly' ? (
           <RangePicker
             value={dateRange}
