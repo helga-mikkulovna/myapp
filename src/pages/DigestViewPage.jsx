@@ -101,7 +101,10 @@ const DigestViewPage = () => {
     if (!contentRef.current) return
     message.loading('Создание PDF...', 0)
     try {
+      const filterBlock = contentRef.current.querySelector('.no-print')
+      if (filterBlock) filterBlock.style.display = 'none'
       const canvas = await html2canvas(contentRef.current, { scale: 2, backgroundColor: '#ffffff', logging: false })
+      if (filterBlock) filterBlock.style.display = ''
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
       const imgWidth = 210
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, (canvas.height * imgWidth) / canvas.width)
@@ -303,7 +306,7 @@ const DigestViewPage = () => {
 
           {/* Блок фильтрации (только для недельного дайджеста) */}
         
-          <div style={{
+          <div className="no-print" style={{
             background: 'rgb(217, 235, 250)',
             border: '1px solid #D6E4F5',
             borderRadius: 12,
@@ -449,6 +452,8 @@ const DigestViewPage = () => {
         @media print {
           .ant-btn { display: none !important; }
           .ant-card { break-inside: avoid; }
+          .no-print { display: none !important; }
+          .ant-tooltip { display: none !important; }
         }
       `}</style>
     </div>
