@@ -299,9 +299,6 @@ const DigestViewPage = () => {
             <Title level={isMobile ? 4 : 3} style={{ color: '#0A2B4E', margin: 0 }}>
               Все новости дайджеста
             </Title>
-            <Tag style={{ background: 'rgb(171, 231, 213)', border: '1px solid rgb(52, 183, 128)', color: 'rgb(37, 73, 70)', margin: 0, fontSize: 13, padding: 5 }}>
-              {digest.stats.totalNews} новостей
-            </Tag>
           </div>
 
           {/* Блок фильтрации (только для недельного дайджеста) */}
